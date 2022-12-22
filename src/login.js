@@ -12,6 +12,8 @@ import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import useLocalStorage from "./hooks/useLocalStorage"
+import { useNavigate } from "react-router-dom";
 
 function Copyright(props) {
   return (
@@ -25,38 +27,49 @@ function Copyright(props) {
     </Typography>
   );
 }
+const fakeUser = [
+  {
+    user: "admin@visut.ac.th",
+    password: "admin123"
+  },
+  {
+    user: "40000@visut.ac.th",
+    password: "40000"
+  },
+  {
+    user: "40001@visut.ac.th",
+    password: "40001"
+  },
+  {
+    user: "40623@visut.ac.th",
+    password: "40623"
+  },
+
+]
 
 const theme = createTheme();
 
 export default function SignInSide() {
+  const [user, setUser] = useLocalStorage("userData", {});
+  const navigate = useNavigate()
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const jsonData = {
-        email: data.get('email'),
-        password: data.get('password'),
+
+    const user = data.get('email')
+    const password = data.get('password')
+
+    let result = fakeUser.filter(item=>item.user === user && item.password === password)
+
+    if (result.length > 0) {
+      setUser(result[0])
+      alert("login success")
+      navigate("/")
+    }else {
+      alert("error")
     }
-   
-  fetch("http://localhost:1337/api/students", {
-    method: 'POST', 
-    headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(jsonData),
-})
-.then((response) => response.json())
-.then((data) => {
-  if (data.status === 'ok'){
-    localStorage.setItem('token', data.token)
-    window.location = '/album'
-    alert('login success')
-  } else{
-    alert('login failed')
-  }
-})
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+    
   };
 
   return (
@@ -69,7 +82,7 @@ export default function SignInSide() {
           sm={4}
           md={7}
           sx={{
-            backgroundImage: 'url(https://source.unsplash.com/random)',
+            backgroundImage: 'url(https://cdn.discordapp.com/attachments/856511869631987722/1055114924541612062/visut.jpg)',
             backgroundRepeat: 'no-repeat',
             backgroundColor: (t) =>
               t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
